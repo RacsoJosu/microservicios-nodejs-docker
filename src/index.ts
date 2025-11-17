@@ -4,7 +4,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
-// Bun ya carga .env automáticamente, pero si usas Node.js:
 import dotenv from 'dotenv';
 import dayjs from './utils/dayjs';
 import { DEFAULT_FORMAT_DAYJS } from './utils/const';
