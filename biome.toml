@@ -1,0 +1,13 @@
+[format]
+line_width = 100
+quote_style = "double"
+trailing_comma = "always"
+
+[linter]
+rules = "recommended"
+
+[project]
+root = "."
+
+[ignore]
+paths = ["node_modules", "logs", "dist"]
