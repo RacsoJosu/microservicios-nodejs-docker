@@ -1,17 +1,41 @@
+version: "3.9"
+
 services:
-  db:
+  # ----------------------
+  # Base de datos de servicios
+  # ----------------------
+  db_orders:
     image: postgres:16-alpine
-    container_name: postgres_db
+    container_name: postgres_orders_db
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
-      POSTGRES_DB: services
+      POSTGRES_DB: orders
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_orders_data:/var/lib/postgresql/data
 
+  # ----------------------
+  # Base de datos de usuarios
+  # ----------------------
+  db_users:
+    image: postgres:16-alpine
+    container_name: postgres_users_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: users
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_users_data:/var/lib/postgresql/data
+
+  # ----------------------
+  # Adminer para administrar ambas DBs
+  # ----------------------
   adminer:
     image: adminer
     container_name: adminer_ui
@@ -19,6 +43,57 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      - db_orders
+      - db_users
+
+  # ----------------------
+  # RabbitMQ para eventos entre microservicios
+  # ----------------------
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # cola
+      - "15672:15672" # panel web
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  # ----------------------
+  # Microservicio de servicios
+  # ----------------------
+  # orders_services:
+  #   build: ./orders-service
+  #   container_name: orders_services
+  #   restart: always
+  #   environment:
+  #     DATABASE_URL: postgres://postgres:root@db_services:5432/orders
+  #     RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - db_services
+  #     - rabbitmq
+
+  # ----------------------
+  # Microservicio de usuarios
+  # ----------------------
+  # users_service:
+  #   build: ./users-service
+  #   container_name: users_service
+  #   restart: always
+  #   environment:
+  #     DATABASE_URL: postgres://postgres:root@db_users:5432/users
+  #     RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+  #   ports:
+  #     - "3001:3000"
+  #   depends_on:
+  #     - db_users
+  #     - rabbitmq
+
+# ----------------------
+# Volúmenes persistentes
+# ----------------------
 volumes:
-  db_data:
+  db_services_data:
+  db_users_data:
